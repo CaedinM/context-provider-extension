@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Context Provider</title>
+  <link rel="stylesheet" href="sidebar.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <span>Context</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="reanalyze-btn" title="Re-analyze page">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" id="close-btn" title="Close">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="body" id="body">
+      <div class="state-loading" id="state-loading">
+        <div class="spinner"></div>
+        <p>Reading the page…</p>
+      </div>
+
+      <div class="state-error hidden" id="state-error">
+        <div class="error-icon">!</div>
+        <p id="error-message">Something went wrong.</p>
+        <button class="retry-btn" id="retry-btn">Try again</button>
+      </div>
+
+      <div class="state-ready hidden" id="state-ready">
+        <div class="tldr-card">
+          <div class="tldr-label">TL;DR</div>
+          <p class="tldr-text" id="tldr-text"></p>
+        </div>
+
+        <div class="followups-section">
+          <div class="section-label">Suggested questions</div>
+          <div class="followups-list" id="followups-list"></div>
+        </div>
+
+        <div class="chat-section">
+          <div class="section-label" id="chat-label" style="display:none;">Conversation</div>
+          <div class="chat-messages" id="chat-messages"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-bar" id="input-bar">
+      <input type="text" id="chat-input" placeholder="Ask a follow-up…" autocomplete="off" />
+      <button class="send-btn" id="send-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="marked.min.js"></script>
+  <script src="sidebar.js"></script>
+</body>
+</html>
