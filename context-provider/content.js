@@ -107,14 +107,16 @@
 
       if (event.data.type === "CHAT_MESSAGE") {
         const { userMessage, history, pageText } = event.data;
-        chrome.runtime.sendMessage(
-          { type: "CHAT_MESSAGE", userMessage, pageText, history },
-          (response) => {
-            if (sidebarFrame) {
-            sidebarFrame.contentWindow.postMessage({ type: "CHAT_RESPONSE", ...response }, EXTENSION_ORIGIN);
-            }
+        const port = chrome.runtime.connect({ name: "chat" });
+
+        port.onMessage.addListener((msg) => {
+          if (sidebarFrame) {
+            sidebarFrame.contentWindow.postMessage(msg, EXTENSION_ORIGIN);
           }
-        );
+          if (msg.type === "DONE" || msg.type === "ERROR") port.disconnect();
+        });
+
+        port.postMessage({ userMessage, history, pageText });
       }
 
       if (event.data.type === "REANALYZE") {

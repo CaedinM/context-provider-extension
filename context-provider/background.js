@@ -73,8 +73,17 @@ Analyze the provided page text and return a JSON object with EXACTLY this struct
     return true;
   }
 
-  if (message.type === "CHAT_MESSAGE") {
-    const { userMessage, pageText, history } = message;
+});
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== "chat") return;
+
+  port.onMessage.addListener(async ({ userMessage, pageText, history }) => {
+    const apiKey = await getApiKey();
+    if (!apiKey) {
+      port.postMessage({ type: "ERROR", error: "NO_API_KEY" });
+      return;
+    }
 
     const isFirstMessage = history.length === 0;
     const systemPrompt = `You are a helpful context assistant. Answer concisely and clearly in 2-4 sentences where possible.
@@ -90,14 +99,53 @@ Analyze the provided page text and return a JSON object with EXACTLY this struct
       { role: "user", content: userMessage }
     ];
 
-    callClaude(messages, systemPrompt, 512)
-      .then((text) => {
-        sendResponse({ success: true, text });
-      })
-      .catch((err) => {
-        sendResponse({ success: false, error: err.message });
+    try {
+      const response = await fetch(CLAUDE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 512,
+          system: systemPrompt,
+          messages,
+          stream: true
+        })
       });
 
-    return true;
-  }
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `API error ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const lines = decoder.decode(value).split("\n");
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6);
+          if (payload === "[DONE]") break;
+          try {
+            const json = JSON.parse(payload);
+            if (json.type === "content_block_delta" && json.delta?.type === "text_delta") {
+              port.postMessage({ type: "CHUNK", text: json.delta.text });
+            }
+          } catch {}
+        }
+      }
+
+      port.postMessage({ type: "DONE" });
+    } catch (err) {
+      port.postMessage({ type: "ERROR", error: err.message });
+    }
+  });
 });

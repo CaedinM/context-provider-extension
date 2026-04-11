@@ -147,14 +147,30 @@ window.addEventListener("message", (event) => {
     showError(error);
   }
 
-  if (type === "CHAT_RESPONSE") {
-    removeTyping();
-    if (success) {
-      appendMessage("assistant", text);
-      state.chatHistory.push({ role: "assistant", content: text });
-    } else {
-      appendMessage("assistant", "Sorry, something went wrong. Please try again.");
+  if (type === "CHUNK") {
+    let bubble = $("streaming-bubble");
+    if (!bubble) {
+      removeTyping();
+      bubble = appendMessage("assistant", "");
+      bubble.id = "streaming-bubble";
+      state.chatHistory.push({ role: "assistant", content: "" });
     }
+    const last = state.chatHistory[state.chatHistory.length - 1];
+    last.content += text;
+    bubble.innerHTML = marked.parse(last.content);
+    bubble.scrollIntoView({ behavior: "smooth", block: "end" });
+  }
+
+  if (type === "DONE") {
+    const bubble = $("streaming-bubble");
+    if (bubble) bubble.removeAttribute("id");
+  }
+
+  if (type === "ERROR") {
+    removeTyping();
+    const bubble = $("streaming-bubble");
+    if (bubble) bubble.removeAttribute("id");
+    appendMessage("assistant", "Sorry, something went wrong. Please try again.");
   }
 });
 
