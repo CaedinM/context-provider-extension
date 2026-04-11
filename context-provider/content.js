@@ -127,6 +127,28 @@
       if (event.data.type === "CLOSE_SIDEBAR") {
         closeSidebar();
       }
+
+      if (event.data.type === "SAVE_TLDR") {
+        const { title, url, tldr } = event.data;
+        chrome.runtime.sendMessage({ type: "SAVE_TLDR", title, url, tldr });
+      }
+
+      if (event.data.type === "LOAD_SAVED") {
+        chrome.runtime.sendMessage({ type: "LOAD_SAVED" }, (response) => {
+          if (sidebarFrame) {
+            sidebarFrame.contentWindow.postMessage({ type: "SAVED_ITEMS", data: response.items }, EXTENSION_ORIGIN);
+          }
+        });
+      }
+
+      if (event.data.type === "DELETE_SAVED") {
+        const { id } = event.data;
+        chrome.runtime.sendMessage({ type: "DELETE_SAVED", id }, (response) => {
+          if (sidebarFrame) {
+            sidebarFrame.contentWindow.postMessage({ type: "SAVED_ITEMS", data: response.items }, EXTENSION_ORIGIN);
+          }
+        });
+      }
     });
   }
 
@@ -145,7 +167,8 @@
       if (response && response.success) {
         pageAnalysis = response.data;
         pageAnalysis.pageText = text;
-        console.log("pageText being sent to sidebar, length:", text.length); // DEBUGGING LOGs
+        pageAnalysis.title = title;
+        pageAnalysis.url = location.href;
         if (sidebarFrame && sidebarOpen) {
           sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, EXTENSION_ORIGIN);
         }

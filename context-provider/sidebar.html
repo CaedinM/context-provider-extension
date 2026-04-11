@@ -20,6 +20,16 @@
         <span>Context</span>
       </div>
       <div class="header-actions">
+        <button class="icon-btn" id="saved-btn" title="Saved items">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+        </button>
         <button class="icon-btn" id="reanalyze-btn" title="Re-analyze page">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"></polyline>
@@ -49,7 +59,14 @@
 
       <div class="state-ready hidden" id="state-ready">
         <div class="tldr-card">
-          <div class="tldr-label">TL;DR</div>
+          <div class="tldr-header">
+            <div class="tldr-label">TL;DR</div>
+            <button class="icon-btn save-btn" id="save-btn" title="Save this page">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
+              </svg>
+            </button>
+          </div>
           <p class="tldr-text" id="tldr-text"></p>
         </div>
 
@@ -63,6 +80,17 @@
           <div class="chat-messages" id="chat-messages"></div>
         </div>
       </div>
+    </div>
+
+    <div class="view-saved hidden" id="view-saved">
+      <div class="saved-empty hidden" id="saved-empty">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted)">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path>
+        </svg>
+        <p>No saved pages yet.</p>
+        <p>Click the bookmark icon on any TL;DR to save it here.</p>
+      </div>
+      <div class="saved-list" id="saved-list"></div>
     </div>
 
     <div class="input-bar" id="input-bar">

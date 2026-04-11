@@ -1,6 +1,10 @@
 const state = {
   chatHistory: [],
-  pageText: ""
+  pageText: "",
+  pageTitle: "",
+  pageUrl: "",
+  tldr: "",
+  inSavedView: false
 };
 
 const EXTENSION_ORIGIN = window.location.origin;
@@ -35,6 +39,10 @@ function showReady(data) {
   show("state-ready");
 
   $("tldr-text").textContent = data.tldr;
+  state.tldr = data.tldr;
+  state.pageTitle = data.title || "";
+  state.pageUrl = data.url || "";
+  $("save-btn").classList.remove("saved");
 
   const followupsList = $("followups-list");
   followupsList.innerHTML = "";
@@ -44,6 +52,90 @@ function showReady(data) {
     btn.textContent = q;
     btn.addEventListener("click", () => sendMessage(q));
     followupsList.appendChild(btn);
+  });
+}
+
+function enterSavedView() {
+  state.inSavedView = true;
+  hide("body");
+  hide("input-bar");
+  hide("reanalyze-btn");
+  show("view-saved");
+  $("saved-btn").title = "Back";
+  $("saved-btn").innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>`;
+  window.parent.postMessage({ type: "LOAD_SAVED" }, "*");
+}
+
+function exitSavedView() {
+  state.inSavedView = false;
+  hide("view-saved");
+  show("body");
+  show("input-bar");
+  show("reanalyze-btn");
+  $("saved-btn").title = "Saved items";
+  $("saved-btn").innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="8" y1="6" x2="21" y2="6"></line>
+      <line x1="8" y1="12" x2="21" y2="12"></line>
+      <line x1="8" y1="18" x2="21" y2="18"></line>
+      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+    </svg>`;
+}
+
+function renderSavedItems(items) {
+  const list = $("saved-list");
+  list.innerHTML = "";
+
+  if (!items || items.length === 0) {
+    show("saved-empty");
+    return;
+  }
+
+  hide("saved-empty");
+
+  items.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "saved-item";
+
+    let domain = item.url;
+    try { domain = new URL(item.url).hostname; } catch {}
+    const date = new Date(item.savedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    const titleEl = document.createElement("a");
+    titleEl.className = "saved-item-title";
+    titleEl.href = item.url;
+    titleEl.target = "_blank";
+    titleEl.rel = "noopener noreferrer";
+    titleEl.textContent = item.title;
+
+    const metaEl = document.createElement("div");
+    metaEl.className = "saved-item-meta";
+    metaEl.textContent = `${domain} · ${date}`;
+
+    const tldrEl = document.createElement("div");
+    tldrEl.className = "saved-item-tldr";
+    tldrEl.textContent = item.tldr;
+
+    const footer = document.createElement("div");
+    footer.className = "saved-item-footer";
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.title = "Remove";
+    deleteBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"></path><path d="M10 11v6M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>`;
+    deleteBtn.addEventListener("click", () => {
+      window.parent.postMessage({ type: "DELETE_SAVED", id: item.id }, "*");
+    });
+
+    footer.appendChild(deleteBtn);
+    card.append(titleEl, metaEl, tldrEl, footer);
+    list.appendChild(card);
   });
 }
 
@@ -116,6 +208,25 @@ $("chat-input").addEventListener("keydown", (e) => {
   }
 });
 
+$("save-btn").addEventListener("click", () => {
+  if ($("save-btn").classList.contains("saved")) return;
+  window.parent.postMessage({
+    type: "SAVE_TLDR",
+    title: state.pageTitle,
+    url: state.pageUrl,
+    tldr: state.tldr
+  }, "*");
+  $("save-btn").classList.add("saved");
+});
+
+$("saved-btn").addEventListener("click", () => {
+  if (state.inSavedView) {
+    exitSavedView();
+  } else {
+    enterSavedView();
+  }
+});
+
 $("close-btn").addEventListener("click", () => {
   window.parent.postMessage({ type: "CLOSE_SIDEBAR" }, "*");
 });
@@ -138,9 +249,12 @@ window.addEventListener("message", (event) => {
   const { type, data, error, text, success } = event.data;
 
   if (type === "ANALYSIS_RESULT") {
-    console.log("sidebar recieved pageText, length:", data.pageText.length); // DEBUGGING LOG
     showReady(data);
     if (data.pageText) state.pageText = data.pageText;
+  }
+
+  if (type === "SAVED_ITEMS") {
+    renderSavedItems(data);
   }
 
   if (type === "ANALYSIS_ERROR") {

@@ -73,6 +73,31 @@ Analyze the provided page text and return a JSON object with EXACTLY this struct
     return true;
   }
 
+  if (message.type === "SAVE_TLDR") {
+    const { title, url, tldr } = message;
+    chrome.storage.local.get(["savedItems"], (result) => {
+      const items = result.savedItems || [];
+      items.unshift({ id: Date.now(), title, url, tldr, savedAt: new Date().toISOString() });
+      chrome.storage.local.set({ savedItems: items }, () => sendResponse({ success: true }));
+    });
+    return true;
+  }
+
+  if (message.type === "LOAD_SAVED") {
+    chrome.storage.local.get(["savedItems"], (result) => {
+      sendResponse({ items: result.savedItems || [] });
+    });
+    return true;
+  }
+
+  if (message.type === "DELETE_SAVED") {
+    const { id } = message;
+    chrome.storage.local.get(["savedItems"], (result) => {
+      const items = (result.savedItems || []).filter(item => item.id !== id);
+      chrome.storage.local.set({ savedItems: items }, () => sendResponse({ items }));
+    });
+    return true;
+  }
 });
 
 chrome.runtime.onConnect.addListener((port) => {
