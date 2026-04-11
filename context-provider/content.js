@@ -8,6 +8,8 @@
   let pageAnalysis = null;
   let isAnalyzing = false;
 
+  const EXTENSION_ORIGIN = new URL(chrome.runtime.getURL("")).origin;
+
   function extractPageText() {
     const article = document.querySelector("article, main, [role='main'], .article-body, .post-content, .entry-content");
     const source = article || document.body;
@@ -94,9 +96,10 @@
     document.body.appendChild(sidebarFrame);
 
     window.addEventListener("message", (event) => {
+      if (event.origin !== EXTENSION_ORIGIN) return;
       if (event.data.type === "SIDEBAR_READY") {
         if (pageAnalysis) {
-          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, "*");
+          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, EXTENSION_ORIGIN);
         } else {
           analyzePage();
         }
@@ -108,7 +111,7 @@
           { type: "CHAT_MESSAGE", userMessage, pageText, history },
           (response) => {
             if (sidebarFrame) {
-            sidebarFrame.contentWindow.postMessage({ type: "CHAT_RESPONSE", ...response }, "*");
+            sidebarFrame.contentWindow.postMessage({ type: "CHAT_RESPONSE", ...response }, EXTENSION_ORIGIN);
             }
           }
         );
@@ -142,12 +145,12 @@
         pageAnalysis.pageText = text;
         console.log("pageText being sent to sidebar, length:", text.length); // DEBUGGING LOGs
         if (sidebarFrame && sidebarOpen) {
-          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, "*");
+          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, EXTENSION_ORIGIN);
         }
       } else {
         const error = response?.error || "Unknown error";
         if (sidebarFrame && sidebarOpen) {
-          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_ERROR", error }, "*");
+          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_ERROR", error }, EXTENSION_ORIGIN);
         }
       }
     });
@@ -168,7 +171,7 @@
 
     if (pageAnalysis) {
       setTimeout(() => {
-        sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, "*");
+        sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, EXTENSION_ORIGIN);
       }, 400);
     }
   }

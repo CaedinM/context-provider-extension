@@ -3,6 +3,11 @@ const state = {
   pageText: ""
 };
 
+const EXTENSION_ORIGIN = window.location.origin;
+const trustedParentOrigin = document.referrer
+  ? new URL(document.referrer).origin
+  : null;
+
 const $ = (id) => document.getElementById(id);
 
 function show(id) { $(id).classList.remove("hidden"); }
@@ -129,6 +134,7 @@ $("retry-btn").addEventListener("click", () => {
 });
 
 window.addEventListener("message", (event) => {
+  if (trustedParentOrigin && event.origin !== trustedParentOrigin) return;
   const { type, data, error, text, success } = event.data;
 
   if (type === "ANALYSIS_RESULT") {
