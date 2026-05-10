@@ -1,12 +1,19 @@
 (() => {
   if (window.__contextProviderInjected) return;
   window.__contextProviderInjected = true;
+  if (!document.body) return;
+
+  function pageIsPdf() {
+    if (document.contentType === "application/pdf") return true;
+    return /\.pdf([?#].*)?$/i.test(location.href) || /\/pdf\/[^?#/][^?#]*$/.test(location.href);
+  }
 
   let sidebarOpen = false;
   let sidebarFrame = null;
   let fab = null;
-  let pageAnalysis = null;
+  let pageAnalysisCache = {};
   let isAnalyzing = false;
+  let currentLevel = "basic";
 
   const EXTENSION_ORIGIN = new URL(chrome.runtime.getURL("")).origin;
 
@@ -53,7 +60,13 @@
       fab.style.boxShadow = "0 4px 14px rgba(79, 70, 229, 0.5)";
     });
 
-    fab.addEventListener("click", toggleSidebar);
+    fab.addEventListener("click", () => {
+      if (pageIsPdf()) {
+        location.href = chrome.runtime.getURL("pdf-viewer.html") + "?url=" + encodeURIComponent(location.href);
+      } else {
+        toggleSidebar();
+      }
+    });
     document.body.appendChild(fab);
   }
 
@@ -98,15 +111,16 @@
     window.addEventListener("message", (event) => {
       if (event.origin !== EXTENSION_ORIGIN) return;
       if (event.data.type === "SIDEBAR_READY") {
-        if (pageAnalysis) {
-          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, EXTENSION_ORIGIN);
+        if (event.data.level) currentLevel = event.data.level;
+        if (pageAnalysisCache[currentLevel]) {
+          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysisCache[currentLevel] }, EXTENSION_ORIGIN);
         } else {
           analyzePage();
         }
       }
 
       if (event.data.type === "CHAT_MESSAGE") {
-        const { userMessage, history, pageText } = event.data;
+        const { userMessage, history, pageText, level } = event.data;
         const port = chrome.runtime.connect({ name: "chat" });
 
         port.onMessage.addListener((msg) => {
@@ -116,11 +130,15 @@
           if (msg.type === "DONE" || msg.type === "ERROR") port.disconnect();
         });
 
-        port.postMessage({ userMessage, history, pageText });
+        port.postMessage({ userMessage, history, pageText, level: level || currentLevel });
       }
 
       if (event.data.type === "REANALYZE") {
-        pageAnalysis = null;
+        if (event.data.level) {
+          currentLevel = event.data.level;
+        } else {
+          delete pageAnalysisCache[currentLevel];
+        }
         analyzePage();
       }
 
@@ -129,8 +147,17 @@
       }
 
       if (event.data.type === "SAVE_TLDR") {
-        const { title, url, tldr } = event.data;
-        chrome.runtime.sendMessage({ type: "SAVE_TLDR", title, url, tldr });
+        const { title, url, tldr, projectId } = event.data;
+        chrome.runtime.sendMessage({ type: "SAVE_TLDR", title, url, tldr, projectId });
+      }
+
+      if (event.data.type === "MOVE_ITEM") {
+        const { id, projectId } = event.data;
+        chrome.runtime.sendMessage({ type: "MOVE_ITEM", id, projectId }, (response) => {
+          if (sidebarFrame) {
+            sidebarFrame.contentWindow.postMessage({ type: "SAVED_ITEMS", data: response.items }, EXTENSION_ORIGIN);
+          }
+        });
       }
 
       if (event.data.type === "LOAD_SAVED") {
@@ -154,23 +181,32 @@
 
   function analyzePage() {
     if (isAnalyzing) return;
+
+    if (pageAnalysisCache[currentLevel]) {
+      if (sidebarFrame && sidebarOpen) {
+        sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysisCache[currentLevel] }, EXTENSION_ORIGIN);
+      }
+      return;
+    }
+
     isAnalyzing = true;
     setFabLoading(true);
 
     const text = extractPageText();
     const title = document.title;
 
-    chrome.runtime.sendMessage({ type: "ANALYZE_PAGE", text, title }, (response) => {
+    chrome.runtime.sendMessage({ type: "ANALYZE_PAGE", text, title, level: currentLevel }, (response) => {
       isAnalyzing = false;
       setFabLoading(false);
 
       if (response && response.success) {
-        pageAnalysis = response.data;
-        pageAnalysis.pageText = text;
-        pageAnalysis.title = title;
-        pageAnalysis.url = location.href;
+        const analysis = response.data;
+        analysis.pageText = text;
+        analysis.title = title;
+        analysis.url = location.href;
+        pageAnalysisCache[currentLevel] = analysis;
         if (sidebarFrame && sidebarOpen) {
-          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, EXTENSION_ORIGIN);
+          sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: analysis }, EXTENSION_ORIGIN);
         }
       } else {
         const error = response?.error || "Unknown error";
@@ -194,9 +230,9 @@
       sidebarFrame.style.transform = "translateX(0)";
     });
 
-    if (pageAnalysis) {
+    if (pageAnalysisCache[currentLevel]) {
       setTimeout(() => {
-        sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysis }, EXTENSION_ORIGIN);
+        sidebarFrame.contentWindow.postMessage({ type: "ANALYSIS_RESULT", data: pageAnalysisCache[currentLevel] }, EXTENSION_ORIGIN);
       }, 400);
     }
   }

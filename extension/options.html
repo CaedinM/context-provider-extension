@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Context Provider — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 320px;
+      background: #fff;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 13px;
+      color: #111827;
+      -webkit-font-smoothing: antialiased;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #F3F4F6;
+    }
+
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      background: #4F46E5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #111827;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: #9CA3AF;
+      margin-top: 1px;
+    }
+
+.pdf-banner {
+      display: none;
+      background: #EEF2FF;
+      border: 1px solid #C7D2FE;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+    }
+
+    .pdf-banner-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #4F46E5;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .open-pdf-btn {
+      width: 100%;
+      padding: 9px;
+      background: #4F46E5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .open-pdf-btn:hover { background: #3730A3; }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid #F3F4F6;
+      margin-bottom: 18px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-mark">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">Context Provider</div>
+      <div class="logo-sub">AI Page Assistant</div>
+    </div>
+  </div>
+
+  <div class="pdf-banner" id="pdf-banner">
+    <div class="pdf-banner-label">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      </svg>
+      PDF detected
+    </div>
+    <button class="open-pdf-btn" id="open-pdf-btn">Open in Context Viewer</button>
+  </div>
+  <hr class="section-divider" id="pdf-divider" style="display:none" />
+
+<script src="options.js"></script>
+</body>
+</html>

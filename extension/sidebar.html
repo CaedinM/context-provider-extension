@@ -45,6 +45,43 @@
       </div>
     </div>
 
+    <div class="level-bar" id="level-bar">
+      <button class="level-btn" data-level="noob">Noob</button>
+      <button class="level-btn active" data-level="basic">Basic</button>
+      <button class="level-btn" data-level="expert">Expert</button>
+    </div>
+
+    <div class="project-bar hidden" id="project-bar">
+      <div class="project-row" id="project-row">
+        <svg class="project-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"></path>
+        </svg>
+        <select id="project-select" class="project-select">
+          <option value="">No project</option>
+        </select>
+        <button class="icon-btn" id="new-project-btn" title="New project">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="project-create-row hidden" id="project-create-row">
+        <input type="text" id="project-name-input" class="project-name-input" placeholder="Project name…" maxlength="40" />
+        <button class="icon-btn" id="project-confirm-btn" title="Create">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </button>
+        <button class="icon-btn" id="project-cancel-btn" title="Cancel">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <div class="body" id="body">
       <div class="state-loading" id="state-loading">
         <div class="spinner"></div>
@@ -103,7 +140,7 @@
     </div>
   </div>
 
-  <script src="marked.min.js"></script>
+  <script src="lib/marked.min.js"></script>
   <script src="sidebar.js"></script>
 </body>
 </html>

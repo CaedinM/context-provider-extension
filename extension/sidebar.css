@@ -92,6 +92,91 @@ html, body {
   color: var(--text-secondary);
 }
 
+/* LEVEL BAR */
+.level-bar {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.level-btn {
+  flex: 1;
+  padding: 5px 0;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.level-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.level-btn.active {
+  background: var(--indigo);
+  border-color: var(--indigo);
+  color: white;
+}
+
+/* PROJECT BAR */
+.project-bar {
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.project-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.project-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.project-select {
+  flex: 1;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.project-create-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-name-input {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  border: 1px solid var(--indigo-mid);
+  border-radius: var(--radius-sm);
+  outline: none;
+  color: var(--text-primary);
+  background: white;
+  min-width: 0;
+}
+
 /* BODY */
 .body {
   flex: 1;
@@ -520,6 +605,43 @@ html, body {
 .delete-btn:hover {
   color: #EF4444;
   background: #FEF2F2;
+}
+
+.saved-section-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-family: 'DM Mono', monospace;
+  padding-top: 6px;
+  margin-bottom: -2px;
+}
+
+.saved-section-header:first-child {
+  padding-top: 0;
+}
+
+.move-select {
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px 5px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s, color 0.15s;
+  margin-right: auto;
+}
+
+.move-select:hover {
+  border-color: var(--indigo-mid);
+  color: var(--text-secondary);
 }
 
 /* UTILITIES */

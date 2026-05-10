@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Instantly understand any article with AI-powered context and chat",
   "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "options.html",
     "default_icon": {
@@ -25,7 +26,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["sidebar.html", "sidebar.css", "sidebar.js", "marked.min.js"],
+      "resources": ["sidebar.html", "sidebar.css", "sidebar.js", "lib/marked.min.js", "pdf-viewer.html", "pdf-viewer.js", "lib/pdf.min.js", "lib/pdf.worker.min.js"],
       "matches": ["<all_urls>"]
     }
   ]
